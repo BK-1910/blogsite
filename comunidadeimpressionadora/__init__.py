@@ -3,13 +3,17 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
-
+import os
 #Padrão para criação de qualquer site
 app = Flask(__name__)
 
 # Criar configuração do app e banco de dados, dentro do arquivo __init__
 app.secret_key = 'aeecb39ba8c1e461f067730319f1cfa8'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///comunidade.db'
+
+if os.getenv("DATABASE_URL"):
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///comunidade.db'
 
 database = SQLAlchemy(app)
 #Variável que pertence a clasee do Bcrypt que será usado para encriptografar senhas
