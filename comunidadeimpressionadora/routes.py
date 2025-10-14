@@ -59,7 +59,7 @@ def login():
         #Encriptografar senha antes da criação do usuário utilizando o bcrypt
         senha_crypt = bcrypt.generate_password_hash(form_criar_conta.senha.data)
         #Criar o usuário
-        usuario = Usuario(username=form_criar_conta.username.data , email=form_criar_conta.email.data, senha=senha_crypt)
+        usuario = Usuario(username=form_criar_conta.username.data , email=form_criar_conta.email.data, senha=senha_crypt).decode('utf-8')
         with app.app_context():
             database.session.add(usuario) #Adicionar a sessão
             database.session.commit() #Commit na sessão
@@ -190,4 +190,5 @@ def excluir_post(post_id):
         return redirect(url_for('home'))
     else:
         #abort é usado para indicar que tal usuário não tem permissão de realizar tal ação
+
         abort(403)
