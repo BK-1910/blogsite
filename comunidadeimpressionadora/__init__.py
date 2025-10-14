@@ -10,8 +10,8 @@ app = Flask(__name__)
 # Criar configuração do app e banco de dados, dentro do arquivo __init__
 app.secret_key = 'aeecb39ba8c1e461f067730319f1cfa8'
 
-if os.getenv("DATABASE_URL"):
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+if os.environ.get('DATABASE_URL'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///comunidade.db'
 
