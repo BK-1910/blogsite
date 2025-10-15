@@ -12,7 +12,7 @@ import secrets
 import os
 #Instalar pip install Pillow para tratar tamanho de imagens
 from PIL import Image
-
+from pathlib import Path
 
 # Criar primeiro link para poder por o site no ar
 @app.route("/")
@@ -106,8 +106,11 @@ def salvar_imagem(imagem):
     codigo = secrets.token_hex(8)
     nome, extensao = os.path.splitext(imagem.filename)
     nome_arquivo = nome + codigo + extensao
-    #Definir caminho a ser salvo a imagem
-    caminho_completo = os.path.join(app.root_path, 'static\\fotos_perfil', nome_arquivo)
+    # Define o caminho usando pathlib
+    caminho_base = Path(__file__).parent
+    caminho_completo = caminho_base / 'static' / 'fotos_perfil' / nome_arquivo
+    # Cria o diretório se não existir
+    caminho_completo.parent.mkdir(parents=True, exist_ok=True)
     # Reduzir o tamanho da imagem
     tamanho = (220, 220)
     imagem_reduzida = Image.open(imagem)
