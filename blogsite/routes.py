@@ -1,5 +1,5 @@
 from fileinput import filename
-from flask import render_template, redirect, url_for, flash, request, abort
+from flask import render_template, redirect, url_for, flash, request, abort, current_app
 from blogsite import app, database, bcrypt, mail
 #Importar formulário para uso em templates/ páginas
 from blogsite.forms import FormLogin, FormCriarConta, FormEditarPerfil, FormCriarPost, ResetSenhaForm, PedirResetForm
@@ -290,3 +290,4 @@ def reset_senha(token):
         return redirect(url_for('login'))
 
     return render_template('reset_senha.html', title='Redefinição de senha', form=form)
+
