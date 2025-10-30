@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+    <div class="container mt-3">
+        <div class="row border mt-4 p-3 justify-content-around meupost">
+            <div class="col col-2">
+                <div class="image pe-3"> <img src="{{ url_for('static', filename='fotos_perfil/{}'.format(post.autor.foto_perfil)) }}" class="rounded" width="220"> </div>
+                <strong>{{ post.autor.username }}</strong>
+                <div class="row justify-content-center">
+                        {% for curso in post.autor.cursos.split(';') %}
+                            <button type="button" class="btn btn-success mt-2" disabled>{{ curso }}</button>
+                        {% endfor %}
+                </div>
+            </div>
+            <div class="col col-9 mf-1">
+                <h3>{{ post.titulo }}
+                    <small class="text-muted" style="font-size: 15px"> - Data de criação: {{ post.data_criacao.strftime("%Y-%m-%d") }}
+                        {% if form %}
+                        <!-- Vamos criar o redirecionamento da página ao clicar em Editar Post, para isso o id=#nome função deve ser usado como referência
+                         Para criar pop up de confirmação de exclusão de post usamos exemplo do modal do bootstrap-->
+                        - <a href="#form_editarpost">Editar Post</a>/ <a href="#" class="text-danger" data-bs-toggle="modal" data-bs-target="#ExcluirPost">Excluir Post</a>
+                        {% endif %}
+                    </small>
+                </h3>
+                <p>{{ post.corpo }}</p>
+            </div>
+        </div>
+    </div>
+
+{% if form %}
+    <div class="container">
+        <hr>
+            <div class="row">
+                <div class="col">
+                    <!-- enctype="multipart/form-data" deve ser usado em casos que a página possua upload de arquiuvos
+                     id='nome função' é usado para criar redirecionamento de página -->
+                    <form method="POST" action="" class="border mt-2 p-4" id="form_editarpost">
+                        {{ form.csrf_token }}
+                        <fieldset>
+                            <legend>Editar Post</legend>
+                            <div class="form-group">
+                                {{ form.titulo.label(class="form-control-label") }}
+                                <!-- Incluir mensagem de erro caso falte o preenchimento correto -->
+                                {% if form.titulo.errors %}
+                                    <!-- Em caso de erro devemos formatar a caixa de login novamente -->
+                                    {{ form.titulo(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for erro in form.titulo.errors %}
+                                            {{ erro }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <!-- Se não houver erro deve seguir com a caixa normal -->
+                                    {{ form.titulo(class="form-control") }}
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                {{ form.corpo.label(class="form-control-label") }}
+                                <!-- Incluir mensagem de erro caso falte o preenchimento correto -->
+                                {% if form.corpo.errors %}
+                                    <!-- Em caso de erro devemos formatar a caixa de login novamente -->
+                                    {{ form.corpo(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for erro in form.corpo.errors %}
+                                            {{ erro }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <!-- Se não houver erro deve seguir com a caixa normal -->
+                                    {{ form.corpo(class="form-control") }}
+                                {% endif %}
+                            </div>
+                        </fieldset>
+                        {{ form.botao_submit_editar(class="btn btn-primary mt-2") }}
+                    </form>
+                </div>
+            </div>
+    </div>
+{% endif %}
+
+<!-- Modal-> seve para criar pop-up -->
+<div class="modal fade" id="ExcluirPost" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel"><strong>Excluir Post</strong></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Tem certeza que deseja excluir o post?</p>
+        <p><strong>Essa ação não poderá ser desfeita!</strong></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <!-- Para poder vincular a função de excluir post ao botão, devemos utilizar o <form></form>
+        e como variável de action=  para o sistema entender qual a referência
+        Deve ser mudado o parâmetro type em <button></button> para 'submit' para que o sistema entenda que o botão agora deve enviar infos para o banco -->
+        <form method="post" action="{{ url_for('excluir_post', post_id=post.id) }}  ">
+            {{ form.csrf_token }}
+            <button type="submit" class="btn btn-danger">Excluir</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
