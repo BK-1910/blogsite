@@ -210,14 +210,46 @@ def excluir_post(post_id):
 
 def enviar_reset_email(usuario):
     token = usuario.reset_senha()
-    mensagem = Message('Pedido de alteração de senha',
-                       sender='brunowuldarczki@gmail.com',
-                       recipients=[usuario.email])
-    mensagem.body = f''' Para resetar sua suenha, por favor, acesse o seguinte link:
-{url_for('reset_senha', token=token, _external=True)}
-Se você não solicitou o reset de senha ou solicitou por engano, por favor desconsidere o email, pois nenhuma mudança ocorrerá
-    '''
-    mail.send(mensagem)
+    reset_url = url_for('reset_senha', token=token, _external=True)
+    
+    # Log sempre (útil para debugging no Railway)
+    print(f"🔐 Token gerado para {usuario.email}: {token}")
+    
+    # Verifica configuração de email
+    mail_username = current_app.config.get('MAIL_USERNAME')
+    mail_password = current_app.config.get('MAIL_PASSWORD')
+    
+    # Se não tem configuração de email, usa modo simulação
+    if not mail_username or not mail_password:
+        print(f"🚫 Email não configurado - Link: {reset_url}")
+        flash('Sistema de email não configurado. Contate o administrador.', 'warning')
+        return
+    
+    try:
+        mensagem = Message(
+            'Blogsite - Redefinição de Senha',
+            sender=current_app.config.get('MAIL_DEFAULT_SENDER', mail_username),
+            recipients=[usuario.email]
+        )
+        mensagem.body = f'''Olá!
+
+Você solicitou a redefinição da sua senha. Para criar uma nova senha, clique no link abaixo:
+
+{reset_url}
+
+Se você não solicitou esta redefinição, por favor ignore este email.
+
+Atenciosamente,
+Equipe Blogsite
+'''
+        mail.send(mensagem)
+        print(f"✅ Email enviado para {usuario.email}")
+        flash('Instruções para redefinir sua senha foram enviadas para seu email.', 'success')
+        
+    except Exception as e:
+        print(f"❌ Erro no envio de email: {e}")
+        # Em produção, não mostra o link para o usuário (segurança)
+        flash('Erro ao enviar email. Por favor, tente novamente em alguns minutos.', 'danger')
 
 
 @app.route('/pedir_reset', methods=['GET', 'POST'])
@@ -256,4 +288,5 @@ def reset_senha(token):
         flash(f'Sua senha foi alterada com sucesso!', 'alert-success')
         #Redirecionar para login
         return redirect(url_for('login'))
+
     return render_template('reset_senha.html', title='Redefinição de senha', form=form)
