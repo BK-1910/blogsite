@@ -242,6 +242,7 @@ Se você não solicitou esta redefinição, por favor ignore este email.
 Atenciosamente,
 Equipe Blogsite
 '''
+        print(f"🧩 Tentando enviar via {current_app.config.get('MAIL_SERVER')}:{current_app.config.get('MAIL_PORT')}")
         mail.send(mensagem)
         print(f"✅ Email enviado para {usuario.email}")
         flash('Instruções para redefinir sua senha foram enviadas para seu email.', 'success')
@@ -290,4 +291,5 @@ def reset_senha(token):
         return redirect(url_for('login'))
 
     return render_template('reset_senha.html', title='Redefinição de senha', form=form)
+
 
