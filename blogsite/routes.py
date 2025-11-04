@@ -270,8 +270,6 @@ Equipe Blogsite
         print(f"⚠️ Erro inesperado ao enviar e-mail: {e}")
         flash('Falha no envio do e-mail. Por favor, tente novamente.', 'danger')
 
-    return render_template('pedir_reset.html', title='Pedir Reset', form=form)
-
 
 @app.route('/pedir_reset', methods=['GET', 'POST'])
 def pedir_reset():
@@ -311,6 +309,7 @@ def reset_senha(token):
         return redirect(url_for('login'))
 
     return render_template('reset_senha.html', title='Redefinição de senha', form=form)
+
 
 
 
