@@ -75,14 +75,23 @@ Atualize o MAIL_DEFAULT_SENDER com o e-mail verificado.
 
 
 🛠️ Estrutura Básica do Projeto
+
 blogsite/
+
 │
+
 ├── __init__.py          # Configurações do app e extensões
+
 ├── models.py            # Modelos e tabelas do banco
+
 ├── routes.py            # Rotas principais e lógicas de negócio
+
 ├── static/              # Arquivos CSS, JS e imagens
+
 ├── templates/           # Páginas HTML (login, home, etc.)
+
 └── forms.py             # Formulários WTForms
+
 
 👨‍💻 Autor
 Projeto desenvolvido por Bruno Ken.
