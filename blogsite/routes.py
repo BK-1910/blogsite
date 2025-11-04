@@ -217,7 +217,7 @@ def enviar_reset_email(usuario):
 
     # Obtém chave da API do SendGrid
     SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
-    FROM_EMAIL = os.getenv('MAIL_DEFAULT_SENDER', 'no-reply@blogsite.com')
+    FROM_EMAIL = os.getenv('MAIL_DEFAULT_SENDER', 'brunowuldarczki@gmail.com')
 
     if not SENDGRID_API_KEY:
         print("🚫 SENDGRID_API_KEY não configurada no Railway.")
@@ -293,5 +293,6 @@ def reset_senha(token):
         return redirect(url_for('login'))
 
     return render_template('reset_senha.html', title='Redefinição de senha', form=form)
+
 
 
