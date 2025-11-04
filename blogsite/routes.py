@@ -207,7 +207,7 @@ def excluir_post(post_id):
         #abort é usado para indicar que tal usuário não tem permissão de realizar tal ação
         abort(403)
 
-@app.route('/pedir_reset', methods=['GET', 'POST'])
+
 def enviar_reset_email(usuario):
     """Envia e-mail de redefinição de senha usando a API do SendGrid"""
     token = usuario.reset_senha()
@@ -273,6 +273,24 @@ Equipe Blogsite
     return render_template('pedir_reset.html', title='Pedir Reset', form=form)
 
 
+@app.route('/pedir_reset', methods=['GET', 'POST'])
+def pedir_reset():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+
+    form = PedirResetForm()
+    if form.validate_on_submit():
+        usuario = Usuario.query.filter_by(email=form.email.data).first()
+        if usuario:
+            enviar_reset_email(usuario)
+            flash('Enviamos um e-mail com instruções para resetar sua senha!', 'alert-info')
+        else:
+            flash('Email não encontrado', 'alert-warning')
+        return redirect(url_for('login'))
+
+    return render_template('pedir_reset.html', title='Pedir Reset', form=form)
+
+
 @app.route('/reset_senha/<token>', methods=['GET', 'POST'])
 def reset_senha(token):
     if current_user.is_authenticated:
@@ -293,6 +311,7 @@ def reset_senha(token):
         return redirect(url_for('login'))
 
     return render_template('reset_senha.html', title='Redefinição de senha', form=form)
+
 
 
 
