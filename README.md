@@ -23,11 +23,11 @@ Banco de dados persistente com SQLAlchemy
 Interface responsiva baseada em Bootstrap
 
 🚀 Deploy na Railway
-# Configurações Flask
+Configurações Flask
 SECRET_KEY=chave_secreta
 DATABASE_URL=sqlite:///comunidade.db  # ou URL do banco Railway
 
-# Configurações de E-mail (SendGrid)
+Configurações de E-mail (SendGrid)
 SENDGRID_API_KEY=SG.xxxxxxx
 MAIL_DEFAULT_SENDER=seuemailverificado@dominio.com
 MAIL_PASSWORD=suasenhaappgmail
