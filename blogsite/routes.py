@@ -11,7 +11,7 @@ from flask_mail import Message
 #Importar a biblioteca secrets para alteração de nome de imagens uplodadas
 import secrets
 #Importar os para poder tratar caminhos no projeto
-import os
+import os, requests
 #Instalar pip install Pillow para tratar tamanho de imagens
 from PIL import Image
 from pathlib import Path
@@ -209,64 +209,66 @@ def excluir_post(post_id):
 
 
 def enviar_reset_email(usuario):
+    """Envia e-mail de redefinição de senha usando a API do SendGrid"""
     token = usuario.reset_senha()
     reset_url = url_for('reset_senha', token=token, _external=True)
     
-    # Log sempre (útil para debugging no Railway)
     print(f"🔐 Token gerado para {usuario.email}: {token}")
-    
-    # Verifica configuração de email
-    mail_username = current_app.config.get('MAIL_USERNAME')
-    mail_password = current_app.config.get('MAIL_PASSWORD')
-    
-    # Se não tem configuração de email, usa modo simulação
-    if not mail_username or not mail_password:
-        print(f"🚫 Email não configurado - Link: {reset_url}")
-        flash('Sistema de email não configurado. Contate o administrador.', 'warning')
+
+    # Obtém chave da API do SendGrid
+    SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
+    FROM_EMAIL = os.getenv('MAIL_DEFAULT_SENDER', 'no-reply@blogsite.com')
+
+    if not SENDGRID_API_KEY:
+        print("🚫 SENDGRID_API_KEY não configurada no Railway.")
+        flash('Erro: serviço de e-mail não configurado.', 'warning')
         return
-    
-    try:
-        mensagem = Message(
-            'Blogsite - Redefinição de Senha',
-            sender=current_app.config.get('MAIL_DEFAULT_SENDER', mail_username),
-            recipients=[usuario.email]
-        )
-        mensagem.body = f'''Olá!
+
+    # Monta corpo do e-mail
+    conteudo = f"""Olá!
 
 Você solicitou a redefinição da sua senha. Para criar uma nova senha, clique no link abaixo:
 
 {reset_url}
 
-Se você não solicitou esta redefinição, por favor ignore este email.
+Se você não solicitou esta redefinição, por favor ignore este e-mail.
 
 Atenciosamente,
 Equipe Blogsite
-'''
-        print(f"🧩 Tentando enviar via {current_app.config.get('MAIL_SERVER')}:{current_app.config.get('MAIL_PORT')}")
-        mail.send(mensagem)
-        print(f"✅ Email enviado para {usuario.email}")
-        flash('Instruções para redefinir sua senha foram enviadas para seu email.', 'success')
-        
-    except Exception as e:
-        print(f"❌ Erro no envio de email: {e}")
-        # Em produção, não mostra o link para o usuário (segurança)
-        flash('Erro ao enviar email. Por favor, tente novamente em alguns minutos.', 'danger')
+"""
 
+    data = {
+        "personalizations": [{
+            "to": [{"email": usuario.email}],
+            "subject": "Blogsite - Redefinição de Senha"
+        }],
+        "from": {"email": FROM_EMAIL},
+        "content": [{
+            "type": "text/plain",
+            "value": conteudo
+        }]
+    }
 
-@app.route('/pedir_reset', methods=['GET', 'POST'])
-def pedir_reset():
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
+    try:
+        response = requests.post(
+            "https://api.sendgrid.com/v3/mail/send",
+            headers={
+                "Authorization": f"Bearer {SENDGRID_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json=data
+        )
 
-    form = PedirResetForm()
-    if form.validate_on_submit():
-        usuario = Usuario.query.filter_by(email=form.email.data).first()
-        if usuario:
-            enviar_reset_email(usuario)
-            flash('Enviamos um e-mail com instruções para resetar sua senha!', 'alert-info')
+        if response.status_code == 202:
+            print(f"✅ E-mail de redefinição enviado para {usuario.email}")
+            flash('As instruções para redefinir sua senha foram enviadas por e-mail.', 'success')
         else:
-            flash('Email não encontrado', 'alert-warning')
-        return redirect(url_for('login'))
+            print(f"❌ Erro no envio ({response.status_code}): {response.text}")
+            flash('Não foi possível enviar o e-mail de redefinição. Tente novamente mais tarde.', 'danger')
+
+    except Exception as e:
+        print(f"⚠️ Erro inesperado ao enviar e-mail: {e}")
+        flash('Falha no envio do e-mail. Por favor, tente novamente.', 'danger')
 
     return render_template('pedir_reset.html', title='Pedir Reset', form=form)
 
