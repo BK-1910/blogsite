@@ -207,7 +207,7 @@ def excluir_post(post_id):
         #abort é usado para indicar que tal usuário não tem permissão de realizar tal ação
         abort(403)
 
-
+@app.route('/pedir_reset', methods=['GET', 'POST'])
 def enviar_reset_email(usuario):
     """Envia e-mail de redefinição de senha usando a API do SendGrid"""
     token = usuario.reset_senha()
@@ -293,6 +293,7 @@ def reset_senha(token):
         return redirect(url_for('login'))
 
     return render_template('reset_senha.html', title='Redefinição de senha', form=form)
+
 
 
 
